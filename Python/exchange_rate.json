@@ -1,0 +1,8 @@
+{
+  "base": "INR",
+  "quote": "KRW",
+  "rate": 14.22,
+  "as_of": "2026-11-17",
+  "source": "https://wise.com/us/currency-converter/inr-to-krw-rate/history/17-11-2026",
+  "mode": "fixed_reference"
+}
