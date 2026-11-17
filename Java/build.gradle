@@ -1,0 +1,32 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '4.1.1'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'springweb'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies { // 의존성 : 프로젝트에 필요한 라이브러리 목록 -> 자동으로 설치
+	// 1. 스프링 웹 (컨트롤러, 내장 톰캣 서버)
+	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	// 2. 웹플럭스 (WebClient, Flux, Mono : FastAPI 와 논블로킹 통신)
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	// 3. 테스트
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
