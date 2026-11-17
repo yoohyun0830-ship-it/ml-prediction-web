@@ -1,23 +1,29 @@
-# CARFIT
+﻿# CARFIT React
 
-중고차 예상 가격과 예산별 추천 모델을 보여주는 React + Vite 프런트엔드입니다.
+실제 LightGBM 예측 결과를 Spring SSE를 통해 표시하는 React 화면입니다.
 
-## 실행
+프로젝트 최상위 폴더에서 Python(8000), Java(8080)를 먼저 실행한 뒤:
 
 ```powershell
-cd React
-npm.cmd install
-npm.cmd run dev
+npm.cmd --prefix React ci
+npm.cmd --prefix React run dev
 ```
 
-터미널에 표시된 로컬 주소를 브라우저에서 여세요. 배포용 파일은 `npm.cmd run build`로 생성합니다.
+브라우저: http://127.0.0.1:5173/
 
-## 기능
+- CSV의 제조사·모델 선택지와 기본 조건을 Spring `/api/catalog`에서 가져옵니다.
+- 예산 입력은 만 원 단위이며 요청에는 원(KRW)으로 변환합니다.
+- axios fetch 어댑터로 `/api/predictions/stream`에 POST하고 SSE를 파싱합니다.
+- 진행 상태, 실제 모델 가격, R²·MAE, 추천 차량, 요청 취소·오류·재시도를 지원합니다.
+- 관심 차량은 페이지 메모리에 보관되며 새로고침 시 초기화됩니다.
+- 가격은 인도 데이터 기반 예측의 원화 환산값이며, 추천 차량은 실시간 판매 매물이 아닙니다.
 
-- 제조사/모델/연식/주행거리/사고 이력 입력 및 데모 가격 계산
-- 예상 가격과 예시 범위(±10%) 표시
-- 구매 예산과 차종에 따른 추천 모델 필터
-- 관심 차량 등록/해제 및 필터(현재 페이지 세션에만 보관)
-- 모바일 반응형 화면
+전체 서버 실행과 연동 검증은 프로젝트 최상위 README.md를 참고하세요.
 
-실제 거래 데이터, 학습 모델, 매물 API는 연결되어 있지 않습니다. 가격은 소스 내 예시 기준가에 연식·주행거리·사고 감가를 적용한 데모 결과입니다. 실제 예측을 연결할 때 `src/main.jsx`의 `estimate` 호출을 Python 백엔드 API 요청으로 교체하세요. 현재 `Python/predict.py`는 수정하지 않았습니다.
+```powershell
+node --test React/test/sse.test.mjs
+npm.cmd --prefix React run build
+node React/scripts/check-integration.mjs
+```
+
+`/api` 프록시는 개발 서버 설정입니다. 배포 시에도 같은 경로를 Spring으로 전달하는 리버스 프록시가 필요합니다.

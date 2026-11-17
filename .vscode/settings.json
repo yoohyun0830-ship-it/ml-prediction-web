@@ -1,3 +1,11 @@
 {
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.server.launchMode": "Standard",
+    "java.import.gradle.enabled": true,
+    "java.import.gradle.user.home": "${workspaceFolder}/.tools/gradle",
+    "python.defaultInterpreterPath": "${workspaceFolder}/Python/.venv/Scripts/python.exe",
+    "python.analysis.extraPaths": ["${workspaceFolder}/Python"],
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": ["Python"],
+    "files.encoding": "utf8"
 }

@@ -1,0 +1,9 @@
+{
+  "include": ["Python"],
+  "exclude": ["Python/.venv", "Python/__pycache__", "Python/artifacts"],
+  "venvPath": "Python",
+  "venv": ".venv",
+  "extraPaths": ["Python"],
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "basic"
+}

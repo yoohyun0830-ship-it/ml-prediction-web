@@ -14,6 +14,11 @@ public record PredictionRequest(
         Integer kilometer,    // 4. 주행거리(km)
         String fuelType,      // 5. 연료 종류
         String transmission,  // 6. 변속기
-        String owner          // 7. 소유자 이력
+        String owner,         // 7. 소유자 이력
+        Double budget,        // 8. 구매 예산 (기본: 원)
+        String budget_currency // 9. KRW 또는 INR
 ) {
+    public PredictionRequest {
+        if (budget_currency == null) budget_currency = "KRW";
+    }
 }

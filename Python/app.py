@@ -15,6 +15,7 @@ from currency import EXCHANGE_RATE, INR_TO_KRW, krw_metrics, to_krw
 
 logger = logging.getLogger(__name__)
 
+# [10] 웹에서 받은 차량 조건의 자료형과 범위를 검사합니다.
 class PredictionInput(BaseModel):
     model_config = ConfigDict(extra='forbid', allow_inf_nan=False)
     make: str = Field(min_length=1, max_length=80)
@@ -28,17 +29,18 @@ class PredictionInput(BaseModel):
     budget_currency: Literal['KRW', 'INR'] = Field(default='KRW', description='budget의 통화. 기존 루피 예산을 사용할 때 INR로 지정합니다.')
 
     def frame(self):
-        return pd.DataFrame([[self.make, self.model, self.fuel, self.transmission, self.owner, self.year, self.kilometer]], columns=FEATURES)
+        return pd.DataFrame([[self.make, self.model, self.fuel, self.transmission, self.owner, self.year, self.kilometer]], columns=pd.Index(FEATURES))
 
 @asynccontextmanager
 async def lifespan(app):
     path = ARTIFACTS / 'car_model.pkl'
     if not path.exists():
         raise RuntimeError('Model missing. Run train.py --csv <path> first.')
-    # Local trusted artifact only. Loaded once, never trained inside requests.
+    # [11] Day14처럼 joblib으로 모델을 불러옵니다. 서버 시작 시 한 번만 실행합니다.
     app.state.bundle = joblib.load(path)
     yield
 
+# [12] Day16처럼 FastAPI 서버를 만듭니다.
 app = FastAPI(title='CARFIT LightGBM API', lifespan=lifespan)
 
 def validate_catalogue(payload, bundle):
@@ -51,13 +53,14 @@ def validate_catalogue(payload, bundle):
             raise HTTPException(422, f'Unknown {column}')
 
 def infer(payload, bundle):
+    # [13] 입력을 DataFrame으로 만들고 저장한 모델의 predict()로 가격을 구합니다.
     predicted = max(0.0, float(bundle['pipeline'].predict(payload.frame())[0]))
     catalogue = bundle['catalogue']
     budget = predicted if payload.budget is None else (
         payload.budget / INR_TO_KRW if payload.budget_currency == 'KRW' else payload.budget
     )
-    # These are historical dataset examples, not live listings. Match fuel/transmission
-    # then rank by distance to requested year/mileage; one example per model.
+    # [14] 웹 추가 기능: 예산 이하이며 연료·변속기가 같은 차량을 최대 5개 추천합니다.
+    # 연식과 주행거리가 가까운 순서로 고릅니다. 실제 판매 매물은 아닙니다.
     candidates = catalogue[(catalogue.predicted_price <= budget) & (catalogue['Fuel Type'] == payload.fuel) & (catalogue.Transmission == payload.transmission)].copy()
     candidates['distance'] = abs(candidates.Year - payload.year) / 5 + abs(candidates.Kilometer - payload.kilometer) / 50000
     candidates = candidates.sort_values(['distance', 'predicted_price']).drop_duplicates(['Make', 'Model']).head(5)
@@ -94,6 +97,7 @@ def catalog(request: Request):
 
 @app.post('/predict')
 async def predict(payload: PredictionInput, request: Request):
+    # [15] Day16의 POST 요청처럼 차량 조건을 받고 예측 결과를 JSON으로 반환합니다.
     bundle = request.app.state.bundle
     validate_catalogue(payload, bundle)
     return await run_in_threadpool(infer, payload, bundle)
@@ -103,6 +107,7 @@ def event(name, data):
 
 @app.post('/predict/stream')
 async def predict_stream(payload: PredictionInput, request: Request):
+    # [16] 웹 추가 기능: 진행 상태와 최종 결과를 SSE로 차례대로 보냅니다.
     bundle = request.app.state.bundle
     validate_catalogue(payload, bundle)
     async def generate():

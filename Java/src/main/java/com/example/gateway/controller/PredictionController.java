@@ -4,6 +4,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +13,7 @@ import com.example.gateway.model.dto.PredictionRequest;
 import com.example.gateway.service.PredictionService;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /*
     가격 예측 컨트롤러 : React 의 예측 요청을 받는 창구
@@ -36,4 +38,10 @@ public class PredictionController {
         System.out.println("[PredictionController] 가격 예측 요청 수신 : " + request);
         return predictionService.predictStream(request); // Flux 를 그대로 반환 (.block() 없음)
     }
+
+    @GetMapping(value = "/catalog", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<String> catalog() { return predictionService.getJson("/catalog"); }
+
+    @GetMapping(value = "/health", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<String> health() { return predictionService.getJson("/health"); }
 }

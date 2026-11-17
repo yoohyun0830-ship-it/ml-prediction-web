@@ -1,9 +1,12 @@
 Python/.venv/
 Python/__pycache__/
 Python/.pytest_cache/
+.pytest_cache/
 Python/artifacts/
 Python/data/
 Java/target/
+Java/build/
+Java/.gradle/
 .tools/
 .venv/
 *.log

@@ -1,4 +1,4 @@
-"""Presentation conversion only; saved model and evaluation artifacts stay in INR."""
+"""웹 표시용 환산입니다. 저장된 모델과 평가 지표의 단위는 INR입니다."""
 import json
 import math
 from pathlib import Path
@@ -9,6 +9,7 @@ if not math.isfinite(INR_TO_KRW) or INR_TO_KRW <= 0:
     raise ValueError('INR/KRW reference rate must be finite and positive')
 
 def to_krw(amount):
+    # [17] 웹 추가 기능: 루피 예측값에 고정 참고 환율을 곱해 원화로 표시합니다.
     return round(float(amount) * INR_TO_KRW)
 
 def krw_metrics(original):

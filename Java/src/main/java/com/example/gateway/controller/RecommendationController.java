@@ -7,14 +7,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.gateway.model.dto.RecommendationRequest;
+import com.example.gateway.model.dto.PredictionRequest;
 import com.example.gateway.service.RecommendationService;
 
 import reactor.core.publisher.Mono;
 
 /*
     차량 추천 컨트롤러 : React 의 추천 요청을 받는 창구
-    * FastAPI 가 준 JSON(후보 최대 3개 배열, 없으면 []) 을 가공 없이 그대로 응답
+    * FastAPI 예측 응답에 포함된 추천 배열(최대 5개)을 반환한다.
 */
 @RestController
 @RequestMapping("/api")
@@ -30,7 +30,7 @@ public class RecommendationController {
 
     // 1. http://localhost:8080/api/recommendations  [POST]  응답 : JSON
     @PostMapping(value = "/recommendations", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<String> recommend(@RequestBody RecommendationRequest request) {
+    public Mono<Object> recommend(@RequestBody PredictionRequest request) {
         System.out.println("[RecommendationController] 차량 추천 요청 수신 : " + request);
         return recommendationService.recommend(request); // Mono 를 그대로 반환 (.block() 없음)
     }
